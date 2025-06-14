@@ -1,0 +1,18 @@
+name: Adapter-Render CI
+on:
+  push:
+    paths: ["src/**", "tests/**", "asconfig.json", "package.json", ".github/workflows/adapter-ci.yml"]
+  pull_request:
+    paths: ["src/**", "tests/**", "asconfig.json", "package.json", ".github/workflows/adapter-ci.yml"]
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with: { node-version: 18, cache: "npm" }
+
+      - run: npm ci
+      - run: npm run test               # as-pect tests
+      - run: npx graph build            # emits build/adapter.wasm
