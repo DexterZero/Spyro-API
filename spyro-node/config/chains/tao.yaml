@@ -1,0 +1,33 @@
+# -------------------------------------------------------------------
+#  TAO / Bittensor — Chain / Provider Descriptor
+# -------------------------------------------------------------------
+
+chain:
+  name:         "tao-mainnet"
+  display_name: "Bittensor (TAO) Mainnet"
+  chain_id:     1995                    # Bittensor’s Substrate–EVM ID, adjust if different
+  finality:     12                      # TAO finalises in ~12 blocks
+  average_block_time_ms: 6000
+
+ingest:
+  firehose:
+    endpoint:   "https://firehose.taonet.org:443"   # sample URL; replace with actual
+    insecure:   false
+    start_block: 0
+  websocket:
+    endpoint:   "wss://ws.taonet.org/models"
+    topics:
+      - "ModelScoreUpdate"
+      - "ServeEvent"
+  rest:
+    base_url:   "https://api.taonet.org/v1"
+    poll_interval_sec: 15
+
+mappings:
+  # Compiled WASM mapping module for TAO/Bittensor
+  wasm: "../spyro-adapter-tao/build/adapter.wasm"
+
+features:
+  enable_quality_scores:    true   # include TAO model score updates
+  enable_latency_metrics:   true
+  enable_full_trace:        false
