@@ -1,0 +1,25 @@
+specVersion: 0.0.1
+description: "Render proof-of-render to AI-Graph entities"
+schema:
+  file: ../spyro-contracts/contracts/curation/schema.graphql
+dataSources:
+  - kind: firehose
+    name: RenderProofs
+    network: render-mainnet
+    source:
+      endpoint: https://firehose.render.xyz:443
+    mapping:
+      file: ./build/adapter.wasm
+      apiVersion: 0.0.7
+      entities:
+        - Provider
+        - Model
+        - InferenceJob
+      abis:
+        - name: RenderProofs
+          file: ./abis/RenderProofs.json
+      handlers:
+        - handler: handleProof
+          kind: proto
+          filter:
+            messageName: ProofSubmitted
