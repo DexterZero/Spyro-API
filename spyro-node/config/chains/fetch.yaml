@@ -1,0 +1,32 @@
+# -------------------------------------------------------------------
+#  Fetch.ai — Chain / Provider Descriptor
+# -------------------------------------------------------------------
+
+chain:
+  name:         "fetch-mainnet"
+  display_name: "Fetch.ai Mainnet"
+  chain_id:     5678                    # replace with official ID if different
+  finality:     50                      # blocks considered final
+  average_block_time_ms: 7000           # ~7-second blocks
+
+ingest:
+  firehose:
+    endpoint:   "https://firehose.fetch.ai:443"   # sample; update as needed
+    insecure:   false
+    start_block: 0
+  websocket:
+    endpoint:   "wss://ws.fetch.ai/ai-events"
+    topics:
+      - "AgentRegistered"
+      - "ServiceUpdate"
+  rest:
+    base_url:   "https://api.fetch.ai/v1"
+    poll_interval_sec: 12
+
+mappings:
+  # Compiled WASM adapter for Fetch.ai telemetry
+  wasm: "../spyro-adapter-fetch/build/adapter.wasm"
+
+features:
+  enable_agent_metrics:  true   # track agent latency, success rate
+  enable_full_trace:     false  # set true to store full TX traces
