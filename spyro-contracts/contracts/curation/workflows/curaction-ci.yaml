@@ -1,0 +1,47 @@
+name: Curation CI
+
+# ────────────────────────────────────────────────────────────────
+# Trigger on any change under contracts/curation/ or on workflow file itself
+# ────────────────────────────────────────────────────────────────
+on:
+  push:
+    paths:
+      - "contracts/curation/**"
+      - ".github/workflows/curation-ci.yml"
+  pull_request:
+    paths:
+      - "contracts/curation/**"
+      - ".github/workflows/curation-ci.yml"
+
+jobs:
+  build-test-static:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣  Checkout repo
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # 2️⃣  Install Foundry tool-chain (includes forge & cast)
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly   # or pin to a specific tag
+
+      # Optional: fetch sub-modules / external libs
+      - run: forge install
+
+      # 3️⃣  Run only curation tests (CurationTest & MigrationTest)
+      - name: Run Forge tests
+        run: |
+          forge test \
+            --match-contract "CurationTest|MigrationTest" \
+            -vv
+
+      # 4️⃣  Static analysis with Slither (fails build on ≥High issues)
+      - name: Static analysis (Slither)
+        uses: crytic/slither-action@v0.3.0
+        with:
+          target: "."
+          sarif: true           # uploads report to “Security” tab
+          fail-on: high
