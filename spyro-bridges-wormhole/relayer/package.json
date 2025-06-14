@@ -1,0 +1,33 @@
+{
+  "name": "spyro-bridges-wormhole-relayer",
+  "version": "0.1.0",
+  "description": "Off-chain relayer for Spyro Wormhole bridge messages",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "ts-node src/index.ts",
+    "watch": "tsc --watch -p tsconfig.json",
+    "test": "jest --config jest.config.js",
+    "lint": "eslint 'src/**/*.{ts,js}'"
+  },
+  "dependencies": {
+    "ethers": "^6.0.0",
+    "@certusone/wormhole-sdk": "^1.0.0",
+    "yargs": "^17.0.1",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
