@@ -1,0 +1,86 @@
+version: "3.9"
+
+volumes:
+  shared-deploy:        # holds spyro-all.json produced by Hardhat deploy
+  pg-data:              # Postgres data files
+
+networks:
+  devnet:
+
+services:
+  ####################################################################
+  # 1 ─ Hardhat EVM + contract deploy
+  ####################################################################
+  hardhat:
+    build:
+      context: ./services/hardhat
+      dockerfile: Dockerfile
+    container_name: spyro-hardhat
+    command: ["bash", "/entrypoint.sh"]
+    ports:
+      - "8545:8545"
+    volumes:
+      - shared-deploy:/opt/spyro/deploy        # write spyro-all.json here
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8545"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [devnet]
+
+  ####################################################################
+  # 2 ─ Postgres for Spyro-Node store
+  ####################################################################
+  postgres:
+    image: postgres:15
+    container_name: spyro-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: spyro
+      POSTGRES_PASSWORD: spyro
+      POSTGRES_DB: spyro
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./services/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "spyro"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [devnet]
+
+  ####################################################################
+  # 3 ─ Spyro-Node indexer (Graph-Node fork)
+  ####################################################################
+  spyro-node:
+    image: spyro-node:latest         # built from spyro-node/docker/Dockerfile
+    container_name: spyro-node
+    depends_on:
+      hardhat:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - shared-deploy:/opt/spyro/deploy:ro
+      - ./services/spyro-node/spyro.toml:/app/config/spyro.toml:ro
+    environment:
+      POSTGRES_URL: postgres://spyro:spyro@postgres:5432/spyro
+      RPC_URL: http://hardhat:8545
+    ports:
+      - "8000:8000"    # GraphQL
+      - "8040:8040"    # Prometheus metrics
+    networks: [devnet]
+
+  ####################################################################
+  # 4 ─ Front-end Gateway (optional, static files or proxy)
+  ####################################################################
+  gateway:
+    build:
+      context: ./services/gateway
+      dockerfile: Dockerfile
+    container_name: spyro-gateway
+    depends_on:
+      - spyro-node
+    ports:
+      - "8080:80"      # Nginx default
+    networks: [devnet]
