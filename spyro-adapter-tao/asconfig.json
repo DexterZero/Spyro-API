@@ -1,0 +1,30 @@
+{
+  "targets": {
+    "debug": {
+      "binaryFile": "build/adapter.wasm",
+      "textFile": "build/adapter.wat",
+      "sourceMap": true,
+      "optimize": false
+    },
+    "release": {
+      "binaryFile": "build/adapter.wasm",
+      "textFile": "build/adapter.wat",
+      "optimizeLevel": 3,
+      "shrinkLevel": 1,
+      "converge": false,
+      "sourceMap": false
+    }
+  },
+  "options": {
+    "exportRuntime": false,          // smaller WASM, runtime provided by Spyro-Node
+    "measure": false,
+    "explicitStart": false,
+    "bindings": "raw"               // Graph-Node/Spyro-Node expects raw ABI
+  },
+  "entries": [
+    {
+      "name": "adapter",
+      "source": "src/index.ts"      // mapping entry file
+    }
+  ]
+}
