@@ -1,0 +1,17 @@
+{
+  "nodeId": 21,
+  "modelHash": "0x6d6f64656c54616f",          // "modelTao" in hex
+  "modelVersion": "v2",
+  "paramCount": 450000,
+  "latencySeconds": 3,
+  "fee": 17,
+  "inputHash": "0xfeedfeedfeedfeedfeedfeedfeedfeedfeedfeed",
+  "block": {
+    "number": 555555,
+    "timestamp": 1700000001
+  },
+  "transaction": {
+    "hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "from": "0xca11ba5eba11ba5eba11ba5eba11ba5eba11ba5e"
+  }
+}
