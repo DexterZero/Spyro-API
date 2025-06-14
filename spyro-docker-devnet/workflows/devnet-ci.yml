@@ -1,0 +1,88 @@
+name: Devnet CI
+
+on:
+  push:
+    paths:
+      - "docker-compose.yml"
+      - "services/hardhat/**"
+      - "services/postgres/**"
+      - "services/spyro-node/**"
+      - "services/gateway/**"
+      - ".github/workflows/devnet-ci.yml"
+  pull_request:
+    paths:
+      - "docker-compose.yml"
+      - "services/hardhat/**"
+      - "services/postgres/**"
+      - "services/spyro-node/**"
+      - "services/gateway/**"
+      - ".github/workflows/devnet-ci.yml"
+
+jobs:
+  devnet-up:
+    runs-on: ubuntu-latest
+    services:
+      docker:
+        image: docker:24.0.0
+        options: --privileged
+        ports:
+          - 2375:2375
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and start Devnet stack
+        run: |
+          docker compose up -d --build
+        working-directory: .
+
+      - name: Wait for Hardhat
+        run: |
+          for i in {1..20}; do
+            if curl -sf http://localhost:8545 > /dev/null; then
+              echo "Hardhat is up"
+              break
+            fi
+            sleep 3
+          done
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..20}; do
+            if pg_isready -h localhost -p 5432 -U spyro > /dev/null; then
+              echo "Postgres is ready"
+              break
+            fi
+            sleep 3
+          done
+        env:
+          PGPASSWORD: spyro
+
+      - name: Wait for Spyro-Node metrics
+        run: |
+          for i in {1..20}; do
+            if curl -sf http://localhost:8040/metrics > /dev/null; then
+              echo "Spyro-Node is ready"
+              break
+            fi
+            sleep 3
+          done
+
+      - name: Run Quickstart smoke test
+        run: |
+          cd examples
+          npx ts-node quickstart.ts --network http://localhost:8545
+        working-directory: .
+
+      - name: Run GraphQL query smoke test
+        run: |
+          curl -X POST http://localhost:8000/graphql \
+            -H "Content-Type: application/json" \
+            -d '{"query":"{ _meta { block { number } } }"}' \
+            | grep '"number"'
+      
+      - name: Tear down Devnet
+        run: docker compose down --volumes
