@@ -1,0 +1,19 @@
+{
+  "name": "spyro-adapter-tao",
+  "version": "0.1.0",
+  "description": "AssemblyScript → WASM mapping for TAO/Bittensor AI-Graph events",
+  "license": "Apache-2.0",
+  "scripts": {
+    "clean": "rimraf build",
+    "build": "graph build --config aigraph.yaml --output-dir build",
+    "test": "asp --config as-pect.config.js",
+    "watch": "npm run build -- --watch"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.33.0",
+    "@graphprotocol/graph-ts": "^0.30.1",
+    "as-pect": "^7.0.1",
+    "assemblyscript": "^0.27.11",
+    "rimraf": "^5.0.1"
+  }
+}
