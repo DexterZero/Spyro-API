@@ -1,0 +1,44 @@
+# -------------------------------------------------------------------
+#  Render Network — Chain / Provider Descriptor
+# -------------------------------------------------------------------
+# This file supplements spyro.toml.  Each chain descriptor declares:
+#   • a canonical chain/network name
+#   • data ingestion endpoints (Firehose gRPC + optional REST/WebSocket)
+#   • indexing start-block (or cursor) and block-time hints
+#   • network-specific settings such as finality depth
+# -------------------------------------------------------------------
+
+chain:
+  name:         "render-mainnet"          # unique key for this network
+  display_name: "Render Network Mainnet"  # human-friendly
+  chain_id:     6666                      # if Render publishes an EVM ID
+  finality:     64                        # blocks before considered final
+  average_block_time_ms: 2000             # used for index-lag gauges
+
+ingest:
+  firehose:
+    # High-throughput protobuf stream of block data produced by Render’s own
+    # Firehose node or StreamingFast gateway.  Spyro-Firehose connects here.
+    endpoint:   "https://firehose.render.xyz:443"
+    insecure:   false                     # set true for local devnet
+    # Start from block 0 for initial sync; can be overridden by CLI
+    start_block: 0
+  websocket:
+    # Optional WebSocket stream for real-time model updates or proofs
+    endpoint:   "wss://stream.render.xyz/models"
+    topics:
+      - "ProofSubmitted"
+      - "ModelVersion"
+  rest:
+    # Fallback REST polling if Firehose is unavailable
+    base_url:   "https://api.render.xyz/v1"
+    poll_interval_sec: 10
+
+mappings:
+  # Path is relative to spyro-node working dir or absolute.
+  wasm: "../spyro-adapter-render/build/adapter.wasm"
+
+# Optional feature flags
+features:
+  enable_model_quality_metrics: true
+  enable_full_trace:            false    # set true to store full TX traces
