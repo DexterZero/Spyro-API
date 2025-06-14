@@ -1,0 +1,19 @@
+{
+  "nodeId": 42,
+  "modelHash": "0x746573744d6f64656c",          // "testModel" in hex
+  "modelVersion": "v1",
+  "paramCount": 900000,
+  "stake": 1000000,
+  "score": 9876,
+  "latencySeconds": 2,
+  "fee": 5,
+  "inputHash": "0xfeedfacefeedfacefeedfacefeedfacefeedface",
+  "block": {
+    "number": 123456,
+    "timestamp": 1695555555
+  },
+  "transaction": {
+    "hash": "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+    "from": "0xbabe000000000000000000000000000000000000"
+  }
+}
