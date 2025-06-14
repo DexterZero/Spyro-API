@@ -1,0 +1,10 @@
+{
+  "targets": {
+    "debug": { "binaryFile": "build/adapter.wasm", "optimize": false },
+    "release": { "binaryFile": "build/adapter.wasm", "optimizeLevel": 3, "shrinkLevel": 1 }
+  },
+  "options": {
+    "exportRuntime": false,
+    "measure": false
+  }
+}
