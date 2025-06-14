@@ -1,0 +1,38 @@
+specVersion: 0.0.1
+description: |
+  Index AI-Graph data from Bittensor (TAO) mainnet.
+  Maps ServeEvent ➜ Provider, Model, InferenceJob
+  Maps ModelScoreUpdate ➜ ScoreUpdate & Provider.reputation
+
+schema:
+  file: ../spyro-contracts/contracts/curation/schema.graphql
+
+dataSources:
+  - kind: firehose
+    name: TaoEvents
+    network: tao-mainnet             # must match chain descriptor name
+    source:
+      endpoint: https://firehose.taonet.org:443
+      startBlock: 0
+    mapping:
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./build/adapter.wasm
+      entities:
+        - Provider
+        - Model
+        - InferenceJob
+        - ScoreUpdate
+      abis:
+        - name: TaoBridge
+          file: ./abis/taobridge.json
+      handlers:
+        # Firehose protobuf message names (or ABI event names if EVM bridge)
+        - handler: handleServe
+          kind: proto
+          filter:
+            messageName: ServeEvent
+        - handler: handleScoreUpdate
+          kind: proto
+          filter:
+            messageName: ModelScoreUpdate
