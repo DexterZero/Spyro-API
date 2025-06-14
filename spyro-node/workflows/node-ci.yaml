@@ -1,0 +1,55 @@
+name: Spyro-Node CI
+
+on:
+  push:
+    paths:
+      - "cmd/**"
+      - "src/**"
+      - "Cargo.*"
+      - ".github/workflows/node-ci.yml"
+      - "config/**"
+  pull_request:
+    paths:
+      - "cmd/**"
+      - "src/**"
+      - "Cargo.*"
+      - ".github/workflows/node-ci.yml"
+      - "config/**"
+
+jobs:
+  build-test-lint:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        toolchain: [stable]        # add 'beta', 'nightly' if you’d like
+
+    steps:
+      # 1️⃣  Checkout repository
+      - uses: actions/checkout@v3
+
+      # 2️⃣  Install Rust toolchain + cache
+      - name: Set up Rust ${{ matrix.toolchain }}
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+          components: clippy,rustfmt
+
+      - uses: Swatinem/rust-cache@v2    # caches target/ and ~/.cargo
+
+      # 3️⃣  Build workspace (all binaries & libs)
+      - name: Cargo build
+        run: cargo build --workspace --all-targets
+
+      # 4️⃣  Run unit tests
+      - name: Cargo test
+        run: cargo test --workspace --all-features --all-targets -- --nocapture
+
+      # 5️⃣  Clippy lint (fail on warnings)
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      # 6️⃣  Format check
+      - name: rustfmt check
+        run: cargo fmt --all -- --check
