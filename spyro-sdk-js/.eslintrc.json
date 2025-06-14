@@ -1,0 +1,60 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2020": true,
+    "jest": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint", "import", "prettier"],
+  "extends": [
+    "airbnb-typescript/base",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "rules": {
+    /* Prettier takes care of formatting; treat style issues as errors */
+    "prettier/prettier": "error",
+
+    /* Ethers v6 returns BigInt – allow explicit‐any only when casting from Contract ABI */
+    "@typescript-eslint/no-explicit-any": ["error", { "ignoreRestArgs": true }],
+
+    /* Allow dev dependencies in test and config files */
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": [
+          "**/tests/**",
+          "**/*.test.ts",
+          "**/jest.config.*",
+          "**/examples/**",
+          "**/scripts/**"
+        ]
+      }
+    ],
+
+    /* Prefer named exports, but allow default for single-class barrel files */
+    "import/prefer-default-export": "off",
+
+    /* Warn when relative imports go too deep */
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": ["../*../*"]
+      }
+    ]
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "project": "./tsconfig.json"
+      }
+    }
+  }
+}
