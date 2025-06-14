@@ -1,0 +1,88 @@
+############################################################################
+#  Spyro-Node Configuration
+#  ------------------------------------------------------------------------
+#  Copy this file to e.g. /etc/spyro/spyro.toml and point the binary at it:
+#
+#     spyro-node --config /etc/spyro/spyro.toml
+############################################################################
+
+############################################################################
+# Storage & Chain Data
+############################################################################
+[store]
+postgres_url  = "postgres://spyro:password@localhost:5432/spyro"   # Graph-Node DB
+ipfs_endpoint = "http://127.0.0.1:5001"                            # for WASM fetches
+
+############################################################################
+# GraphQL Indexer / Gateway
+############################################################################
+[graphql]
+http_port = 8000            # POST / GET GraphQL
+ws_port   = 8001            # subscriptions
+playground = true           # enable /graphiql
+
+############################################################################
+# Prometheus Metrics
+############################################################################
+[metrics]
+bind = "0.0.0.0:8040"       # prometheus will scrape /metrics here
+
+############################################################################
+# Ingest Sources
+############################################################################
+# Each provider block lists one or more endpoints that emit Firehose or
+# WebSocket streams the ingest layer can poll.
+############################################################################
+[[providers]]
+name      = "render"
+kind      = "Render"
+endpoint  = "https://firehose.render.xyz:443"
+start_cursor = "0"          # start from genesis (or leave empty)
+
+[[providers]]
+name      = "tao"
+kind      = "Tao"
+endpoint  = "wss://stream.taonet.org/events"
+start_cursor = "latest"
+
+[[providers]]
+name      = "fetch"
+kind      = "Fetch"
+endpoint  = "https://firehose.fetch.ai:443"
+start_cursor = "0"
+
+############################################################################
+# Mapping Modules
+############################################################################
+# Paths to the WASM files built from spyro-adapter-* repos.  They can be
+# absolute or relative to the spyro-node working directory.
+############################################################################
+[mappers]
+render = "../spyro-adapter-render/build/adapter.wasm"
+tao    = "../spyro-adapter-tao/build/adapter.wasm"
+fetch  = "../spyro-adapter-fetch/build/adapter.wasm"
+
+############################################################################
+# Logging
+############################################################################
+[log]
+# One of: trace, debug, info, warn, error
+level = "info"
+# Per-module overrides:
+# module_levels.render = "debug"
+# module_levels.mapper = "debug"
+
+############################################################################
+# Economic Parameters (optional overrides—defaults match on-chain values)
+############################################################################
+[economics]
+inflation_rate = "0.03"     # 3 % annual, used by keeper sanity checks
+curation_tax   = "0.025"    # 2.5 %, off-chain calc for UI
+delegation_cap = 16         # 16× self-stake
+
+############################################################################
+# TLS / HTTPS (optional - reverse proxy recommended in prod)
+############################################################################
+#[tls]
+#cert_file = "/etc/letsencrypt/live/spyro.ai/fullchain.pem"
+#key_file  = "/etc/letsencrypt/live/spyro.ai/privkey.pem"
