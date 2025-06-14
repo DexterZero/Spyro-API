@@ -1,0 +1,58 @@
+# ---------------------------------------------------------------------------
+#  Spyro‑Node Dockerfile (multi‑stage)
+# ---------------------------------------------------------------------------
+#  Stage 1: Build the spyro‑node binaries in a slim Rust builder image
+# ---------------------------------------------------------------------------
+FROM rust:1.73-slim AS builder
+
+# Install build deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      pkg-config libssl-dev ca-certificates git && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create non‑root user for security
+ARG USER=spyro
+ARG UID=10001
+RUN useradd -m -u $UID $USER
+
+# Workdir
+WORKDIR /usr/src/spyro-node
+
+# Copy manifests first (layer caching)
+COPY Cargo.toml Cargo.lock ./
+COPY cmd ./cmd
+COPY src ./src
+
+# Build in release mode (both binaries via workspace)
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/src/spyro-node/target \
+    cargo build --release --workspace --bins
+
+# ---------------------------------------------------------------------------
+#  Stage 2: Minimal runtime image (glibc‑free) with just the compiled binary
+# ---------------------------------------------------------------------------
+FROM debian:bookworm‑slim AS runtime
+
+# Install runtime deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ca-certificates tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create app user
+ARG USER=spyro
+ARG UID=10001
+RUN useradd -m -u $UID $USER
+
+# Copy binaries & configs from builder
+COPY --from=builder /usr/src/spyro-node/target/release/spyro-node /usr/local/bin/spyro-node
+COPY --from=builder /usr/src/spyro-node/target/release/spyro-firehose /usr/local/bin/spyro-firehose
+COPY config /etc/spyro
+
+# Expose GraphQL (8000), WS (8001), metrics (8040)
+EXPOSE 8000 8001 8040
+
+USER $USER
+WORKDIR /home/$USER
+
+# Default entrypoint
+ENTRYPOINT ["/usr/local/bin/spyro-node", "--config", "/etc/spyro/spyro.toml"]
