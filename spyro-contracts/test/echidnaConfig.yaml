@@ -1,0 +1,28 @@
+###########################################################
+# EchidnaConfig.yaml — global fuzz settings for Spyro
+###########################################################
+
+testMode:     assertion        # use Solidity `assert` / Foundry `assert` hooks
+corpusDir:    ./echidna-corpus # saved inputs
+quickCheck:   false            # full fuzz, not quick
+maxTime:      0                # run until coverage plateaus or Ctrl-C
+maxSize:      40               # max calldata bytes per input
+senderMode:   deploy           # new sender per input (helps actor coverage)
+coverage:     true             # export coverage stats
+filterFunctions:               # only fuzz public mutators across modules
+  - delegate*
+  - queueUnstake*
+  - stake*
+  - signal*
+  - unsignal*
+  - claimRewards*
+  - mintInflation*
+  - depositFees*
+  - migrateVersion*
+  - slash*
+  - queueUndelegate*
+  - claimUndelegated*
+cryticArgs:
+  - --solc remappings @openzeppelin/=lib/openzeppelin-contracts/
+  - --solc remappings forge-std/=lib/forge-std/
+  - --solc opt 200
