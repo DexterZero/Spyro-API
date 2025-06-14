@@ -1,18 +1,59 @@
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "lib": ["ES2020"],
-    "rootDir": "src",
-    "outDir": "dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "noImplicitAny": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "sourceMap": true
-  },
-  "include": ["src/**/*", "test/**/*"],
-  "exclude": ["node_modules", "dist"]
-}
+# .github/workflows/bridge-ci.yml
+
+name: Bridge CI
+
+on:
+  push:
+    paths:
+      - "contracts/**"
+      - "relayer/**"
+      - ".github/workflows/bridge-ci.yml"
+  pull_request:
+    paths:
+      - "contracts/**"
+      - "relayer/**"
+      - ".github/workflows/bridge-ci.yml"
+
+jobs:
+  contracts:
+    name: Contracts Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Foundry
+        uses: anchor/gh-actions-foundry@v1
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Run Foundry tests
+        run: forge test --fork-url ${{ secrets.SOURCE_RPC }} -vv
+
+  relayer:
+    name: Relayer Test & Build
+    runs-on: ubuntu-latest
+    needs: contracts
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install relayer deps
+        working-directory: relayer
+        run: npm ci
+
+      - name: Type-check & build
+        working-directory: relayer
+        run: npm run build
+
+      - name: Run relayer tests
+        working-directory: relayer
+        run: npm test
