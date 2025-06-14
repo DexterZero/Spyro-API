@@ -1,0 +1,49 @@
+###############################################################################
+#  Spyro-Node – Devnet Configuration
+#  ---------------------------------
+#  Loaded by the docker-compose service `spyro-node`.
+#  This file overrides only what differs from production:
+#    • RPC URL points at the Hardhat container
+#    • Postgres points at the local service
+#    • Firehose / provider streams are disabled for speed
+###############################################################################
+
+###############################################################################
+# Chain & RPC
+###############################################################################
+[store]
+postgres_url  = "postgres://spyro:spyro@postgres:5432/spyro"
+ipfs_endpoint = ""                       # IPFS not needed in devnet
+
+[rpc]
+ethereum_rpc  = "http://hardhat:8545"    # points at hardhat service
+
+###############################################################################
+# GraphQL & Metrics
+###############################################################################
+[graphql]
+http_port   = 8000
+ws_port     = 8001
+playground  = true                       # enable GraphiQL UI
+
+[metrics]
+bind = "0.0.0.0:8040"
+
+###############################################################################
+# Providers (NONE for devnet, ingest is stubbed)
+###############################################################################
+providers = []
+
+###############################################################################
+# Mappers – point at locally built WASM to avoid pulling from IPFS
+###############################################################################
+[mappers]
+render = "/opt/spyro/deploy/adapter-render.wasm"
+tao    = "/opt/spyro/deploy/adapter-tao.wasm"
+fetch  = "/opt/spyro/deploy/adapter-fetch.wasm"
+
+###############################################################################
+# Logging
+###############################################################################
+[log]
+level = "debug"                          # verbose for local debugging
