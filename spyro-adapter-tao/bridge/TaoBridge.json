@@ -1,0 +1,26 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true,  "internalType": "uint256", "name": "nodeId",        "type": "uint256" },
+      { "indexed": false, "internalType": "bytes32", "name": "modelHash",     "type": "bytes32" },
+      { "indexed": false, "internalType": "string",  "name": "modelVersion",  "type": "string" },
+      { "indexed": false, "internalType": "uint256", "name": "paramCount",    "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "latencySeconds","type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "fee",           "type": "uint256" },
+      { "indexed": false, "internalType": "bytes32", "name": "inputHash",     "type": "bytes32" }
+    ],
+    "name": "ServeEvent",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true,  "internalType": "uint256", "name": "nodeId",    "type": "uint256" },
+      { "indexed": false, "internalType": "bytes32", "name": "modelHash", "type": "bytes32" },
+      { "indexed": false, "internalType": "uint32",  "name": "newScore",  "type": "uint32" }
+    ],
+    "name": "ModelScoreUpdate",
+    "type": "event"
+  }
+]
