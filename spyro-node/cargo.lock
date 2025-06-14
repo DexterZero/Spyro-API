@@ -1,0 +1,3 @@
+cd spyro-node
+cargo build --workspace                # or `cargo check`
+git add Cargo.lock                     # commit the generated file
