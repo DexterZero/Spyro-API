@@ -1,0 +1,41 @@
+###############################################################################
+# Stage 1 ─ Build layer: install Node + project deps
+###############################################################################
+FROM node:20-bullseye-slim AS builder
+
+# Set a working directory
+WORKDIR /opt/spyro
+
+# Copy only package files first to leverage Docker layer caching
+COPY spyro-contracts/package*.json ./spyro-contracts/
+COPY spyro-contracts/tsconfig.json ./spyro-contracts/
+
+# Install deps for spyro-contracts (needed to compile & deploy)
+RUN cd spyro-contracts \
+ && npm ci --omit=dev
+
+###############################################################################
+# Stage 2 ─ Runtime layer: slimmer image that runs Hardhat node
+###############################################################################
+FROM node:20-bullseye-slim
+
+# Install tini for proper signal forwarding
+RUN apt-get update && apt-get install -y --no-install-recommends tini curl && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV NODE_ENV=production
+WORKDIR /opt/spyro
+
+# Copy node_modules from builder to keep runtime small
+COPY --from=builder /opt/spyro/spyro-contracts/node_modules ./spyro-contracts/node_modules
+
+# Copy actual contract source + deploy script
+COPY spyro-contracts ./spyro-contracts
+
+# Entry script: starts Hardhat node, waits 2 s, runs deployAll.ts,
+# then tails the Hardhat console so the container keeps running.
+COPY services/hardhat/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 8545
+ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint.sh"]
