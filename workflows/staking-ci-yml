@@ -1,0 +1,14 @@
+name: Staking CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: forge install
+      - run: forge test -vvv
+      - uses: crytic/slither-action@v0.3.0
+        with:
+          target: '.'
+          sarif: true
